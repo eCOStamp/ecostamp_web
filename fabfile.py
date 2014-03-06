@@ -10,7 +10,8 @@ def start():
 		local("uwsgi --ini uwsgi.ini")
 
 def stop():
-    local("uwsgi --stop %s" % PID_FILE)
+	with cd(WORKING_DIRECTORY):
+		local("uwsgi --stop %s" % PID_FILE)
 
 def restart():
 	stop()
@@ -18,5 +19,6 @@ def restart():
 	start()
 
 def status():
-	local("cat %s" % PID_FILE)
+	with cd(WORKING_DIRECTORY):
+		local("cat %s" % PID_FILE)
 
