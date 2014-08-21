@@ -46,9 +46,46 @@ def stamp(request, key):
 def register(request):
     try:
         parsed = json.loads(request.body)  # Only available in POST request
-        print parsed
         User.objects.create_user(parsed["username"], parsed["email"], parsed["password"])
         response = {"success": True}
+    except ValueError as e:  # Bad json
+        response = {"success": False, "reason": str(e)}
+    return HttpResponse(json.dumps(response))
+
+
+@require_POST
+def collect(request):
+    try:
+        parsed = json.loads(request.body)  # Only available in POST request
+        user = User.objects.get(username=parsed["username"])
+        stamp = Stamp.objects.get(key=parsed["key"])
+        user.stamp_set.add(stamp)
+        user.save()
+        response = {"success": True}
+    except User.DoesNotExist as e:
+        response = {"success": False, "reason": str(e)}
+    except Stamp.DoesNotExist as e:
+        response = {"success": False, "reason": str(e)}
+    except ValueError as e:  # Bad json
+        response = {"success": False, "reason": str(e)}
+    return HttpResponse(json.dumps(response))
+
+
+def user(request, username):
+    try:
+        user = User.objects.get(username=username)
+        response = {"username": user.username}
+        response["stamps"] = list()
+        for stamp in user.stamp_set.all():
+            response["stamps"].append({
+                "name": stamp.name,
+                "description": stamp.description,
+                "short_description": stamp.short_description,
+                "url": stamp.url,
+                "image_url": stamp.image_url,
+            })
+    except User.DoesNotExist as e:
+        response = {"success": False, "reason": str(e)}
     except ValueError as e:  # Bad json
         response = {"success": False, "reason": str(e)}
     return HttpResponse(json.dumps(response))
