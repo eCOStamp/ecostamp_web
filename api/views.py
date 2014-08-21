@@ -34,8 +34,8 @@ def stamp(request, key):
         response = {"success": False, "reason": str(e)}
     except ValueError as e:  # Bad json
         response = {"success": False, "reason": str(e)}
-    # except TypeError as e:
-    #     response = {"success": False, "reason": str(e)}
+    except TypeError as e:
+        response = {"success": False, "reason": str(e)}
     return HttpResponse(json.dumps(response))
 
 
