@@ -1,9 +1,12 @@
 # from django.shortcuts import render
 from django.http import HttpResponse
 from core.models import Stamp
+from django.contrib.auth.models import User
+from django.views.decorators.http import require_POST
 import json
 
 
+@require_POST
 def dummy(request):
     try:
         response = json.loads(request.body)  # Only available in POST request
@@ -39,6 +42,13 @@ def stamp(request, key):
     return HttpResponse(json.dumps(response))
 
 
+@require_POST
 def register(request):
-    # TODO: Write me
-    pass
+    try:
+        parsed = json.loads(request.body)  # Only available in POST request
+        print parsed
+        User.objects.create_user(parsed["username"], parsed["email"], parsed["password"])
+        response = {"success": True}
+    except ValueError as e:  # Bad json
+        response = {"success": False, "reason": str(e)}
+    return HttpResponse(json.dumps(response))
