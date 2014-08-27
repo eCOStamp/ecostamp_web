@@ -1,6 +1,7 @@
 # from django.shortcuts import render
 from django.http import HttpResponse
 from core.models import Stamp
+from django.contrib.auth import authenticate as auth
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_POST
 import json
@@ -10,11 +11,11 @@ import json
 def dummy(request):
     try:
         response = json.loads(request.body)  # Only available in POST request
-        response["success"] = True
         response["stamp_url"] = "http://ecostamp.naist.jp/static/img/stamp.jpg"
         response["name"] = "Matsumoto Castle"
         response["description"] = "Matsumoto castle is located somewhere in Japan..."
         response["url"] = "http://www.japanese-castle-explorer.com/castle_profile.html?name=Matsumoto"
+        response["success"] = True
     except ValueError as e:  # Bad json
         response = {"success": False, "reason": str(e)}
     except TypeError as e:
@@ -27,12 +28,12 @@ def stamp(request, key):
         print key
         stamp = Stamp.objects.get(key=key)
         response = dict()
-        response["success"] = True
         response["image_url"] = stamp.image_url
         response["name"] = stamp.name
         response["short_description"] = stamp.short_description
         response["description"] = stamp.description
         response["url"] = stamp.url
+        response["success"] = True
     except Stamp.DoesNotExist as e:
         response = {"success": False, "reason": str(e)}
     except ValueError as e:  # Bad json
@@ -84,6 +85,25 @@ def user(request, username):
                 "url": stamp.url,
                 "image_url": stamp.image_url,
             })
+        response = {"success": True}
+    except User.DoesNotExist as e:
+        response = {"success": False, "reason": str(e)}
+    except ValueError as e:  # Bad json
+        response = {"success": False, "reason": str(e)}
+    return HttpResponse(json.dumps(response))
+
+
+@require_POST
+def authenticate(request):
+    try:
+        parsed = json.loads(request.body)  # Only available in POST request
+        user = auth(username=parsed["username"], password=parsed["password"])
+        if user is None:
+            response = {"success": False, "reason": "The username and password were incorrect."}
+        elif not user.is_active:
+            response = {"success": False, "reason": "The password is valid, but the account has been disabled!"}
+        else:
+            response = {"success": True}
     except User.DoesNotExist as e:
         response = {"success": False, "reason": str(e)}
     except ValueError as e:  # Bad json
