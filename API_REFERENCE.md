@@ -35,7 +35,7 @@ Input:
 
 
 /authenicate
-Authenicate user
+Authenticate user
 Input:
   {
     "username": "foo",
@@ -62,6 +62,7 @@ Get user information and stamps
 Output:
   {
     "username": "foo",
+    "success": True
     "stamps": [
       {
         "image_url": "/url/to/stamp/imaage.jpg",
@@ -69,7 +70,7 @@ Output:
         "short_description": "blah",
         "description": "blah",
         "url": "/url/to/get/more/info/can/be/empty",
-        "success": True
+        "collected_at": "2014-08-30T17:26:18.031033"
       }, ...
     ]
   }
