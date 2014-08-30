@@ -4,6 +4,7 @@ from core.models import Stamp
 from django.contrib.auth import authenticate as auth
 from django.contrib.auth.models import User
 from django.views.decorators.http import require_POST
+from datetime import datetime, timedelta
 import json
 
 
@@ -78,14 +79,16 @@ def user(request, username):
         response = {"username": user.username}
         response["stamps"] = list()
         for stamp in user.stamp_set.all():
+            time = datetime.now() - timedelta(hours=1)
             response["stamps"].append({
                 "name": stamp.name,
                 "description": stamp.description,
                 "short_description": stamp.short_description,
                 "url": stamp.url,
                 "image_url": stamp.image_url,
+                "collected_at": time.strftime("%Y-%m-%dT%H:%M:%S.%f"),
             })
-        response = {"success": True}
+        response["success"] = True
     except User.DoesNotExist as e:
         response = {"success": False, "reason": str(e)}
     except ValueError as e:  # Bad json
