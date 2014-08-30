@@ -25,7 +25,7 @@ def dummy(request):
 
 def stamp(request, key):
     try:
-        print key
+        key = key.lower()
         stamp = Stamp.objects.get(key=key)
         response = dict()
         response["image_url"] = stamp.image_url
@@ -59,7 +59,7 @@ def collect(request):
     try:
         parsed = json.loads(request.body)  # Only available in POST request
         user = User.objects.get(username=parsed["username"])
-        stamp = Stamp.objects.get(key=parsed["key"])
+        stamp = Stamp.objects.get(key=parsed["key"].lower())
         user.stamp_set.add(stamp)
         user.save()
         response = {"success": True}
